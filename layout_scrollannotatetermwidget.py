@@ -67,8 +67,8 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
         
         self.formDefaultState = {
             "schemaVersion": self.schemaVersion,
-            "experimentId": "term-1",
-            "experimentName": "default-term-name"
+            "termId": "term-1",
+            "termName": "default-term-name"
         }
 
         self.form.widget.state = deepcopy(self.formDefaultState)
@@ -325,7 +325,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
     def check_term_name_unique(self, saveStatus):
         
         if saveStatus == "save":
-            self.uniqueNameOnSave = True
+            self.uniqueTermNameOnSave = True
         
         self.termNameList = []
         self.termNameList, self.termNameDf = dsc_pkg_utils.get_term_names(self=self, perResource=True) # gets self.experimentNameList
@@ -366,7 +366,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
                     messageText = "<br>Your term cannot be saved because the term name you entered in the Term Name form field is not unique. If you want to assign a term name to your term you must choose a unique term name and enter it into the Term Name form field, then try saving again. Term names already in use include: <br><br>" + "<br>".join(self.termNameList)
                     errorFormat = '<span style="color:red;">{}</span>'
                     self.userMessageBox.append(errorFormat.format(messageText))
-                    self.uniqueNameOnSave = False
+                    self.uniqueTermNameOnSave = False
 
         else: 
             if saveStatus != "save": 
@@ -439,7 +439,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
 
             # get new ID for new annotation file - get the max id num used for existing annotation files and add 1; if no annotation files yet, set id num to 1
         
-            annotationFileList = [filename for filename in os.listdir(self.saveFolderPath) if filename.startswith("exp-trk-exp-")]
+            annotationFileList = [filename for filename in os.listdir(self.saveFolderPath) if filename.startswith("term-trk-term-")]
             print(annotationFileList)
 
             if annotationFileList: # if the list is not empty
@@ -459,7 +459,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
                 }
 
             self.annotation_id = 'term-'+ str(self.annotationIdNum)
-            self.annotationFileName = 'exp-trk-'+ self.annotation_id + '.txt'
+            self.annotationFileName = 'term-trk-'+ self.annotation_id + '.txt'
             self.saveFilePath = os.path.join(self.saveFolderPath,self.annotationFileName)
 
             messageText = "<br>Based on other terms already saved in your working DSC Data Package directory, your new term will be saved with the unique ID: " + self.annotation_id + "<br>Term ID has been added to the term form."
@@ -597,7 +597,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
 
         # check that at least a minimal description has been added to the form 
         # if not exit with informative error
-        if not (annotation["experimentDescription"]):
+        if not (annotation["termDescription"]):
             messageText = "<br>You must add at least a minimal description of your term before saving your annotation file. Please add at least a minimal description of your term in the Term Description field in the form. Then try saving again." 
             errorFormat = '<span style="color:red;">{}</span>'
             self.userMessageBox.append(errorFormat.format(messageText))
@@ -804,7 +804,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
                     print(df)
                     df["annotationCreateDateTime"][0] = restrk_c_datetime
                     df["annotationModDateTime"][0] = restrk_m_datetime
-                    df["experimentIdNumber"][0] = int(IdNumStr)
+                    df["termIdNumber"][0] = int(IdNumStr)
                     df["annotationModTimeStamp"] = restrk_m_timestamp
                     print(df)
                     # df = pd.concat([df,add_to_df], axis = 1) # concatenate cols to df; still a one row dataframe

@@ -92,7 +92,8 @@ class PkgCreateWindow(QtWidgets.QMainWindow):
             self.userMessageBox.append(messageText)
             return
 
-        requiredFiles = ["heal-csv-experiment-tracker.csv","heal-csv-resource-tracker.csv"]
+        #requiredFiles = ["heal-csv-experiment-tracker.csv","heal-csv-resource-tracker.csv"]
+        requiredFiles = ["term-tracker.csv"]
         requiredDirPrefix = "dsc-pkg"
 
         print(Path(pkgPath).name)

@@ -12,7 +12,7 @@ from PyQt5.uic import loadUi
 
 from pathlib import Path # base python, no pip install needed
 
-from healdata_utils.cli import convert_to_vlmd
+#from healdata_utils.cli import convert_to_vlmd
 
 #from frictionless import plugins # frictionless already installed as a healdata_utils dependency, no pip install needed
 #from frictionless.plugins import remote
@@ -38,17 +38,18 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from layout_colorwidget import Color
+#from layout_colorwidget import Color
 #from layout_vlmdwidget import VLMDWindow
 from layout_pkgtabswidget import PkgTabsWindow
-from layout_vlmdtabswidget import VLMDTabsWindow
-from layout_exptrktabswidget import ExpTrkTabsWindow
-from layout_resourcetrktabswidget import ResourceTrkTabsWindow
-from layout_resultstrktabswidget import ResultsTrkTabsWindow
+from layout_termtrktabswidget import TermTrkTabsWindow
+#from layout_vlmdtabswidget import VLMDTabsWindow
+#from layout_exptrktabswidget import ExpTrkTabsWindow
+#from layout_resourcetrktabswidget import ResourceTrkTabsWindow
+#from layout_resultstrktabswidget import ResultsTrkTabsWindow
 #from layout_vlmdcreatewidget import VLMDCreateWindow
-from layout_csveditwidget import CSVEditWindow
+#from layout_csveditwidget import CSVEditWindow
 
-from layout_infotextbrowsewidget import InfoTextBrowserWindow
+#from layout_infotextbrowsewidget import InfoTextBrowserWindow
 
 # this will prevent windows from setting the app icon to python automatically based on .py suffix
 try:
@@ -86,10 +87,12 @@ class MainWindow(QMainWindow):
         self.tabs.setMovable(True)
 
         self.tabs.addTab(PkgTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Data Package")
-        self.tabs.addTab(ExpTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Experiment Tracker")
-        self.tabs.addTab(ResourceTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Resource Tracker")
-        self.tabs.addTab(ResultsTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Results Tracker")
-        self.tabs.addTab(VLMDTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Data Dictionary")
+        self.tabs.addTab(TermTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Term Tracker")
+        
+        #self.tabs.addTab(ExpTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Experiment Tracker")
+        #self.tabs.addTab(ResourceTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Resource Tracker")
+        #self.tabs.addTab(ResultsTrkTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Results Tracker")
+        #self.tabs.addTab(VLMDTabsWindow(workingDataPkgDirDisplay=self.workingDataPkgDirDisplay), "Data Dictionary")
         
         
         #for n, color in enumerate(["red", "green", "blue", "yellow"]):
@@ -109,23 +112,23 @@ class MainWindow(QMainWindow):
         
         #self.setCentralWidget(self.layout)
     
-    def closeEvent(self, event):
-        print("resource tracker tabs widget: ",self.tabs.widget(2))
-        resTrkTabWidget = self.tabs.widget(2)
-        resTrkResToAddWidget = resTrkTabWidget.tabs.widget(2)
-        print("resource tracker resources to add widget: ",resTrkResToAddWidget)
+    # def closeEvent(self, event):
+    #     print("resource tracker tabs widget: ",self.tabs.widget(2))
+    #     resTrkTabWidget = self.tabs.widget(2)
+    #     resTrkResToAddWidget = resTrkTabWidget.tabs.widget(2)
+    #     print("resource tracker resources to add widget: ",resTrkResToAddWidget)
 
-        # print(self.workingDataPkgDirDisplay.toPlainText())
-        # print(self.workingDataPkgDirDisplayDefaultText)
+    #     # print(self.workingDataPkgDirDisplay.toPlainText())
+    #     # print(self.workingDataPkgDirDisplayDefaultText)
 
-        #if self.workingDataPkgDirDisplay.toPlainText() != self.workingDataPkgDirDisplayDefaultText:
-        if not self.workingDataPkgDirDisplay.toPlainText().startswith("Set a working data package directory!"):
-        #if resTrkResToAddWidget.workingDataPkgDir:
-            resTrkResToAddWidget.cleanup()
-        else:
-            print("no working data pkg dir set")
-        # if self.w:
-        #     self.w.close()
+    #     #if self.workingDataPkgDirDisplay.toPlainText() != self.workingDataPkgDirDisplayDefaultText:
+    #     if not self.workingDataPkgDirDisplay.toPlainText().startswith("Set a working data package directory!"):
+    #     #if resTrkResToAddWidget.workingDataPkgDir:
+    #         resTrkResToAddWidget.cleanup()
+    #     else:
+    #         print("no working data pkg dir set")
+    #     # if self.w:
+    #     #     self.w.close()
 
 #app = QApplication(sys.argv)
 

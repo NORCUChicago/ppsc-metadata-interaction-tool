@@ -25,6 +25,7 @@ from healdata_utils.validators.jsonschema import validate_against_jsonschema
 import versions_experiment_tracker
 import versions_resource_tracker
 import versions_results_tracker
+import versions_term_tracker
 
 import schema_experiment_tracker
 import schema_resource_tracker
@@ -39,6 +40,17 @@ from packaging import version
 
 trkDict = {
         
+    "termTracker":{
+        "id": "termId",
+        "schema": schema_term_tracker.schema_term_tracker,
+        "updateSchemaMap": versions_term_tracker.fieldNameMap,
+        "oneOrMulti":"one",
+        "trackerName":"term-tracker.csv",
+        "trackerTypeHyphen":"term-tracker",
+        "trackerTypeMessageString":"Term Tracker",
+        "jsonTxtPrefix": "term-trk-term-",
+        "idPrefix": "term-"
+    },
     "experimentTracker":{
         "id": "experimentId",
         "schema": schema_experiment_tracker.schema_experiment_tracker,

@@ -29,6 +29,7 @@ import versions_results_tracker
 import schema_experiment_tracker
 import schema_resource_tracker
 import schema_results_tracker
+import schema_term_tracker
 
 # from schema_experiment_tracker import schema_experiment_tracker
 # from schema_resource_tracker import schema_resource_tracker
@@ -908,6 +909,101 @@ def get_exp_names(self=None, workingDataPkgDir=None, perResource=False):
     print("experimentNameList: ", experimentNameList)
     return experimentNameList, experimentNameDf
 
+def get_term_names(self=None, workingDataPkgDir=None, perResource=False):
+
+    if self:    
+        getDir = self.workingDataPkgDir
+    elif workingDataPkgDir:
+        getDir = workingDataPkgDir
+    else:
+        print("I need a working data pkg dir path")
+        return
+    
+    print(getDir)
+    getTrk = os.path.join(getDir,"term-tracker.csv")
+
+    if os.path.isfile(getTrk):
+        trackerDf = pd.read_csv(getTrk)
+        #experimentTrackerDf.replace(np.nan, "")
+        trackerDf.fillna("", inplace = True)
+
+        # get only the experiment names that are associated with the latest annotation entry for each experiment
+        # and only if latest entry for that experiment is NOT removed - removed property not yet implemented for 
+        # experiment tracker, but this will work currently AND future proof for when removed property is added
+        trackerDf["annotationModTimeStamp"] = pd.to_datetime(trackerDf["annotationModTimeStamp"])
+        # sort by date-time (ascending), then drop duplicates of id, keeping the last/latest instance of each id's occurrence
+        # to get the latest annotation entry
+        trackerDf.sort_values(by=["annotationModTimeStamp"],ascending=True,inplace=True)
+        trackerDf.drop_duplicates(subset=["termIdNumber"],keep="last",inplace=True)
+
+        if "removed" in trackerDf.columns:
+            trackerDf = trackerDf[trackerDf["removed"] == 0]
+
+        print(trackerDf)
+        print(trackerDf.columns)
+
+        if "termName" in trackerDf.columns:
+
+            #experimentTrackerDf["experimentName"] = experimentTrackerDf["experimentName"].astype(str)
+            nameSeries = trackerDf["termName"].astype(str)
+            print(nameSeries,type(nameSeries))
+            
+            nameDefaultSeries = pd.Series(["default-term-name"])
+            
+            # add default value to list so that default value is always part of the enum for results and resource tracker experimentNameBelongsTo fields - this allows 
+            # default value to be set as the default on drop down for this field 
+            nameSeries = pd.concat([nameDefaultSeries,nameSeries], ignore_index=True)
+            print(nameSeries,type(nameSeries))
+            
+            #experimentNameList = experimentTrackerDf["experimentName"].unique().tolist()
+            nameList = nameSeries.unique().tolist()
+            print(nameList,type(nameList))
+            
+            nameList[:] = [x for x in nameList if x] # get rid of emtpy strings as empty strings are not wanted and mess up the sort() function
+            print(nameList,type(nameList))
+
+            #sortedlist = sorted(list, lambda x: x.rsplit('-', 1)[-1])
+            nameList = sorted(nameList, key = lambda x: x.split('-', 1)[0]) # using lambda function to split so can sort on first part of string before a hyphen if a hyphen exists - can't sort on raw strings that include hyphens
+
+            #experimentName = sorted(experimentNameList, lamda x: x.split('-'))
+            print(nameList,type(nameList))
+
+            # if ((len(experimentNameList) == 1) and (experimentNameList[0] == "default-experiment-name")):
+            #     experimentNameList = []
+            #experimentNameList.remove("default-experiment-name")
+            #print(experimentNameList,type(experimentNameList))
+            
+            if perResource:  
+
+                trackerDf["termName"] = trackerDf["termName"].astype(str)
+                trackerDf["termId"] = trackerDf["termId"].astype(str)
+                
+                nameDf = trackerDf[["termId","termName"]]
+                print(nameDf,type(nameDf))
+                
+                nameDf.drop_duplicates(inplace=True) 
+                nameDf = nameDf[nameDf["termName"].str.len() > 0]  
+
+                
+            else: 
+                nameDf = []
+
+
+        else:
+            print("no termName column in experiment tracker")
+            nameList = []
+            nameDf = []
+    else:
+        print("no term tracker in working data pkg dir")
+        # messageText = "<br>Your working Data Package Directory does not contain a properly formatted Experiment Tracker from which to populate unique experiment names for experiments you've already documented. <br><br> The field in this form <b>Experiment Result \"Belongs\" To</b> pulls from this list of experiment names to provide options of study experiments to which you can link your results. Because we cannot populate this list without your experiment tracker, your only option for this field will be the default experiment name: \"default-experiment-name\"." 
+        # errorFormat = '<span style="color:red;">{}</span>'
+        # self.userMessageBox.append(errorFormat.format(messageText)) 
+        nameList = []
+        nameDf = []
+
+    print("nameList: ", nameList)
+    return nameList, nameDf
+
 def add_exp_names_to_schema(self=None,schema=None,experimentNameList=None):
 
     if self:
@@ -1031,10 +1127,14 @@ def heal_metadata_json_schema_properties(metadataType):
     if metadataType == "results-tracker":
         #props = schema_results_tracker["properties"]
         props = schema_results_tracker.schema_results_tracker["properties"]
+
+    if metadataType == "term-tracker":
+        #props = schema_results_tracker["properties"]
+        props = schema_term_tracker.schema_term_tracker["properties"]
         
 
-    if metadataType not in ["data-dictionary","resource-tracker","experiment-tracker","results-tracker"]:
-        print("metadata type not supported; metadataType must be one of data-dictionary, resource-tracker, experiment-tracker, results-tracker")
+    if metadataType not in ["data-dictionary","resource-tracker","experiment-tracker","results-tracker","term-tracker"]:
+        print("metadata type not supported; metadataType must be one of data-dictionary, resource-tracker, experiment-tracker, results-tracker","term-tracker")
         return
     
     return props
@@ -1155,8 +1255,10 @@ def new_pkg(pkg_parent_dir_path,pkg_dir_name='dsc-pkg',dsc_pkg_resource_dir_path
     operationalFileSubDir = os.path.join(pkg_path,"no-user-access")
     os.mkdir(os.path.join(operationalFileSubDir))
         
-    metadataTypeList = ["experiment-tracker", "resource-tracker","results-tracker"]
-    metadataSchemaVersionList = [schema_experiment_tracker.schema_experiment_tracker["version"], schema_resource_tracker.schema_resource_tracker["version"], schema_results_tracker.schema_results_tracker["version"]]
+    #metadataTypeList = ["experiment-tracker", "resource-tracker","results-tracker"]
+    metadataTypeList = ["term-tracker"]
+    #metadataSchemaVersionList = [schema_experiment_tracker.schema_experiment_tracker["version"], schema_resource_tracker.schema_resource_tracker["version"], schema_results_tracker.schema_results_tracker["version"]]
+    metadataSchemaVersionList = [schema_term_tracker.schema_term_tracker["version"]]
     
     for metadataType, metadataSchemaVersion in zip(metadataTypeList,metadataSchemaVersionList):
 
@@ -1169,6 +1271,8 @@ def new_pkg(pkg_parent_dir_path,pkg_dir_name='dsc-pkg',dsc_pkg_resource_dir_path
 
         if metadataType == "results-tracker":
             fName = "heal-csv-" + metadataType + "-collect-all.csv"
+        elif metadataType == "term-tracker":
+            fName = metadataType + ".csv"
         else:
             fName = "heal-csv-" + metadataType + ".csv"
         

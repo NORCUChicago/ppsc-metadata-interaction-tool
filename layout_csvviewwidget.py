@@ -177,8 +177,10 @@ class CSVViewWindow(QtWidgets.QWidget):
         #mytext = ff.read()
 #            print(mytext)
         #ff.close()
-        f = open(fileName, 'r',newline='')
-        with f:
+
+        # f = open(fileName, 'r',newline='',encoding="utf-8")
+        # with f:
+        with open(fileName, 'r',newline='',encoding="utf-8") as f:
             self.fnameAdd = os.path.splitext(str(fileName))[0].split("/")[-1]
             self.fname = self.fname + ": " + self.fnameAdd
             self.setWindowTitle(self.fname)

@@ -42,7 +42,7 @@ class ScrollAnnotateTermWindow(QtWidgets.QMainWindow):
         self.workingDataPkgDir = workingDataPkgDir
         self.filesCheckList = filesCheckList
         self.mode = mode
-        self.schemaVersion = schema_experiment_tracker["version"]
+        self.schemaVersion = schema_term_tracker["version"]
         self.loadingFormDataFromFile = False
         self.initUI()
 
